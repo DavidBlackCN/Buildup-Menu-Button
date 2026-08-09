@@ -3,9 +3,26 @@ name: Build 26.2
 on:
   push:
     branches: ["*"]
+    paths:
+      - "common/**"
+      - "fabric/**"
+      - "neoforge/**"
+      - "gradle/**"
+      - "*.gradle"
+      - "gradle.properties"
+      - "gradlew"
+      - "gradlew.bat"
   pull_request:
     branches: ["*"]
-  workflow_dispatch:
+    paths:
+      - "common/**"
+      - "fabric/**"
+      - "neoforge/**"
+      - "gradle/**"
+      - "*.gradle"
+      - "gradle.properties"
+      - "gradlew"
+      - "gradlew.bat"
 
 permissions:
   contents: read
@@ -29,6 +46,9 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle Wrapper executable
+        run: chmod +x gradlew
 
       - name: Build Fabric and NeoForge jars
         run: ./gradlew clean build --no-daemon --console=plain
