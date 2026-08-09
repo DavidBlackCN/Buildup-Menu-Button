@@ -20,10 +20,11 @@ public final class BuildupMenuButtonNeoForge {
         if (FMLEnvironment.getDist() != Dist.CLIENT) {
             return;
         }
+        BuildupMenuButton.init();
         ScreenLayoutController controller = BuildupMenuButton.getController();
 
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, ScreenEvent.Init.Post.class, event -> {
-            if (controller.accepts(event.getScreen())) {
+            if (controller.manages(event.getScreen())) {
                 controller.requestLayout(event.getScreen());
             }
         });
@@ -35,7 +36,7 @@ public final class BuildupMenuButtonNeoForge {
         });
 
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, ScreenEvent.Closing.class, event -> {
-            if (controller.accepts(event.getScreen())) {
+            if (controller.manages(event.getScreen())) {
                 controller.onScreenRemoved(event.getScreen());
             }
         });

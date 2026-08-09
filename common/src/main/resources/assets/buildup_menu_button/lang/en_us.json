@@ -1,0 +1,8 @@
+{
+  "config.buildup_menu_button.title": "Buildup My Old Menu Button",
+  "config.buildup_menu_button.title_screen_layout_optimization": "Enable title screen layout optimization",
+  "config.buildup_menu_button.title_screen_layout_optimization.tooltip": "Restores the classic-style layout on the main menu.",
+  "config.buildup_menu_button.pause_screen_layout_optimization": "Enable pause screen layout optimization",
+  "config.buildup_menu_button.pause_screen_layout_optimization.tooltip": "Restores the classic-style layout on the in-game pause menu.",
+  "config.buildup_menu_button.done": "Done"
+}

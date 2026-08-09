@@ -1,6 +1,7 @@
 package com.davidblackcn.buildupmenubutton;
 
 import com.davidblackcn.buildupmenubutton.client.ScreenLayoutController;
+import com.davidblackcn.buildupmenubutton.client.config.LayoutConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,10 +15,18 @@ public final class BuildupMenuButton {
     }
 
     public static void init() {
-        // No loader-specific work is needed here; controller state is created lazily.
+        CONTROLLER.initialize();
     }
 
     public static ScreenLayoutController getController() {
         return CONTROLLER;
+    }
+
+    public static LayoutConfig getConfig() {
+        return CONTROLLER.config();
+    }
+
+    public static void updateConfig(LayoutConfig config) {
+        CONTROLLER.updateConfig(config);
     }
 }

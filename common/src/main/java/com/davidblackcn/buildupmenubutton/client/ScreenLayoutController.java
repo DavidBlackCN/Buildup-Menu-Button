@@ -1,13 +1,18 @@
 package com.davidblackcn.buildupmenubutton.client;
 
 import com.davidblackcn.buildupmenubutton.BuildupMenuButton;
+import com.davidblackcn.buildupmenubutton.client.config.LayoutConfig;
+import com.davidblackcn.buildupmenubutton.client.config.LayoutConfigManager;
 import com.davidblackcn.buildupmenubutton.client.layout.DynamicButtonLayoutManager;
 import com.davidblackcn.buildupmenubutton.client.layout.LayoutPlan;
 import com.davidblackcn.buildupmenubutton.client.layout.Rect;
+import com.davidblackcn.buildupmenubutton.client.layout.WidgetPlacement;
 import com.davidblackcn.buildupmenubutton.client.profile.PauseScreenLayoutProfile;
 import com.davidblackcn.buildupmenubutton.client.profile.ScreenLayoutProfile;
 import com.davidblackcn.buildupmenubutton.client.profile.TitleScreenLayoutProfile;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.client.Minecraft;
@@ -32,20 +37,59 @@ public final class ScreenLayoutController {
     private final ScreenButtonCollector collector = new ScreenButtonCollector();
     private final DynamicButtonLayoutManager manager = new DynamicButtonLayoutManager();
     private final LayoutApplier applier = new LayoutApplier();
+    private final LayoutConfigManager configManager = new LayoutConfigManager();
     private final TitleScreenLayoutProfile titleProfile = new TitleScreenLayoutProfile();
     private final PauseScreenLayoutProfile pauseProfile = new PauseScreenLayoutProfile();
     private final Map<Screen, LayoutState> states = new WeakHashMap<>();
 
+    /** Loads the client configuration once before screen events begin. */
+    public void initialize() {
+        configManager.initialize();
+    }
+
+    public LayoutConfig config() {
+        return configManager.config();
+    }
+
+    /** Persists a live configuration change and applies it to any currently managed target screen. */
+    public void updateConfig(LayoutConfig updatedConfig) {
+        LayoutConfig previousConfig = configManager.config();
+        if (previousConfig.equals(updatedConfig)) {
+            return;
+        }
+        configManager.update(updatedConfig);
+        for (Map.Entry<Screen, LayoutState> entry : new ArrayList<>(states.entrySet())) {
+            Screen screen = entry.getKey();
+            if (screen == null) {
+                continue;
+            }
+            if (!isEnabled(screen, updatedConfig)) {
+                restoreOriginalBounds(screen, entry.getValue());
+            } else if (!isEnabled(screen, previousConfig)) {
+                requestLayout(screen);
+            }
+        }
+    }
+
     public boolean accepts(Screen screen) {
-        return screen != null && (screen.getClass() == TitleScreen.class || screen.getClass() == PauseScreen.class);
+        return isEnabled(screen, configManager.config());
+    }
+
+    /** Returns whether this is one of the exact vanilla screens managed by this controller. */
+    public boolean manages(Screen screen) {
+        return isManagedScreen(screen);
     }
 
     /** 初始化后标记一次布局；具体写入由加载器在安全的界面阶段触发。 */
     public void requestLayout(Screen screen) {
-        if (!accepts(screen)) {
+        if (!isManagedScreen(screen)) {
             return;
         }
         LayoutState state = states.computeIfAbsent(screen, ignored -> new LayoutState());
+        if (!accepts(screen)) {
+            restoreOriginalBounds(screen, state);
+            return;
+        }
         state.dirty = true;
         state.conflict = false;
         state.driftCount = 0;
@@ -57,6 +101,10 @@ public final class ScreenLayoutController {
     public void onFrame(Screen screen) {
         LayoutState state = states.get(screen);
         if (state == null || state.conflict) {
+            return;
+        }
+        if (!accepts(screen)) {
+            restoreOriginalBounds(screen, state);
             return;
         }
         if (observe(screen, state)) {
@@ -71,6 +119,10 @@ public final class ScreenLayoutController {
     public void applyBeforeExtract(Screen screen) {
         LayoutState state = states.get(screen);
         if (state == null || state.conflict) {
+            return;
+        }
+        if (!accepts(screen)) {
+            restoreOriginalBounds(screen, state);
             return;
         }
         if (!state.dirty) {
@@ -128,6 +180,10 @@ public final class ScreenLayoutController {
             state.dirty = false;
             return;
         }
+        if (!accepts(screen)) {
+            restoreOriginalBounds(screen, state);
+            return;
+        }
         ScreenButtonCollector.CollectResult result = collector.collect(screen);
         ScreenLayoutProfile profile = screen.getClass() == TitleScreen.class ? titleProfile : pauseProfile;
         LayoutPlan plan = manager.plan(profile, result.snapshots(), screen.width, screen.height);
@@ -141,6 +197,7 @@ public final class ScreenLayoutController {
             }
             return;
         }
+        captureOriginalBounds(state, result.widgets(), plan);
         if (applier.apply(result.widgets(), plan)) {
             state.lastFingerprint = fingerprint(screen);
             state.dirty = false;
@@ -153,6 +210,49 @@ public final class ScreenLayoutController {
         }
         state.scheduled = true;
         Minecraft.getInstance().execute(() -> runLayout(screen, state));
+    }
+
+    private static boolean isEnabled(Screen screen, LayoutConfig config) {
+        if (!isManagedScreen(screen)) {
+            return false;
+        }
+        if (screen.getClass() == TitleScreen.class) {
+            return config.titleScreenLayoutEnabled();
+        }
+        if (screen.getClass() == PauseScreen.class) {
+            return config.pauseScreenLayoutEnabled();
+        }
+        return false;
+    }
+
+    private static boolean isManagedScreen(Screen screen) {
+        return screen != null && (screen.getClass() == TitleScreen.class || screen.getClass() == PauseScreen.class);
+    }
+
+    private static void captureOriginalBounds(
+            LayoutState state, java.util.List<Button> widgets, LayoutPlan plan) {
+        for (WidgetPlacement placement : plan.placements()) {
+            int index = placement.index();
+            if (index >= 0 && index < widgets.size()) {
+                Button button = widgets.get(index);
+                state.originalBounds.putIfAbsent(button,
+                        new Rect(button.getX(), button.getY(), button.getWidth(), button.getHeight()));
+            }
+        }
+    }
+
+    private static void restoreOriginalBounds(Screen screen, LayoutState state) {
+        for (Map.Entry<Button, Rect> entry : state.originalBounds.entrySet()) {
+            Button button = entry.getKey();
+            Rect rect = entry.getValue();
+            button.setX(rect.x());
+            button.setY(rect.y());
+            button.setWidth(rect.width());
+            button.setHeight(rect.height());
+        }
+        state.scheduled = false;
+        state.dirty = false;
+        state.lastFingerprint = fingerprint(screen);
     }
 
     /** 当前被管理候选按钮的轻量指纹：屏幕尺寸 + 每个可见按钮的几何（按身份哈希去重）。 */
@@ -204,5 +304,6 @@ public final class ScreenLayoutController {
         private boolean warnedConflict;
         private boolean warnedFailOpen;
         private Fingerprint lastFingerprint;
+        private final Map<Button, Rect> originalBounds = new IdentityHashMap<>();
     }
 }

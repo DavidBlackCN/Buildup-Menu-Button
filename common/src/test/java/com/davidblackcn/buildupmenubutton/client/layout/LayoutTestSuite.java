@@ -1,6 +1,7 @@
 package com.davidblackcn.buildupmenubutton.client.layout;
 
 import com.davidblackcn.buildupmenubutton.client.RealmsNotificationAnchorTest;
+import com.davidblackcn.buildupmenubutton.client.config.LayoutConfigCodecTest;
 
 /**
  * 纯 Java 布局测试的入口与共享断言/测试项工具。
@@ -20,6 +21,7 @@ public final class LayoutTestSuite {
         DynamicButtonLayoutManagerTest.runAll();
         LayoutInvariantTest.runAll();
         RealmsNotificationAnchorTest.runAll();
+        LayoutConfigCodecTest.runAll();
     }
 
     public static void assertTrue(boolean condition, String message) {

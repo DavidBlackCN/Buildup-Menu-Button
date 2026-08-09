@@ -12,6 +12,9 @@
   "entrypoints": {
     "client": [
       "com.davidblackcn.buildupmenubutton.fabric.BuildupMenuButtonFabricClient"
+    ],
+    "modmenu": [
+      "com.davidblackcn.buildupmenubutton.fabric.BuildupMenuButtonModMenuApi"
     ]
   },
   "mixins": [

@@ -18,6 +18,17 @@ Use JDK 25, then run:
 
 Release jars are written to `fabric/build/libs/` and `neoforge/build/libs/`.
 
+## Configuration
+
+On the first client launch, the mod creates `config/buildup_menu_button.properties`.
+Both switches default to `true`; set either switch to `false` to keep that screen's vanilla layout.
+With Mod Menu installed on Fabric, use this mod's **Configure** button to change both switches live; the change is saved immediately and the current target screen is updated without a restart.
+
+```properties
+title_screen_layout_optimization=true
+pause_screen_layout_optimization=true
+```
+
 ## License
 
 MIT

@@ -14,10 +14,11 @@ import net.minecraft.client.gui.screens.Screen;
 public final class BuildupMenuButtonFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        BuildupMenuButton.init();
         ScreenLayoutController controller = BuildupMenuButton.getController();
 
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (!controller.accepts(screen)) {
+            if (!controller.manages(screen)) {
                 return;
             }
             controller.requestLayout(screen);
