@@ -1,0 +1,29 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "MIT"
+
+[[mods]]
+modId = "buildup_menu_button"
+version = "${version}"
+displayName = "Buildup Menu Button"
+authors = "DavidBlackCN"
+description = '''
+Restores the classic TitleScreen and PauseScreen button layout on Minecraft 26.2, with adaptive wrapping for third-party buttons.
+'''
+
+[[mixins]]
+config = "buildup_menu_button.mixins.json"
+
+[[dependencies.buildup_menu_button]]
+modId = "neoforge"
+type = "required"
+versionRange = "[26.2,26.3)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.buildup_menu_button]]
+modId = "minecraft"
+type = "required"
+versionRange = "[26.2,26.3)"
+ordering = "NONE"
+side = "CLIENT"

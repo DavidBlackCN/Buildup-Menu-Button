@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "buildup_menu_button",
+  "version": "${version}",
+  "name": "Buildup Menu Button",
+  "description": "Restores the classic TitleScreen and PauseScreen button layout on Minecraft 26.2, with adaptive wrapping for third-party buttons.",
+  "authors": [
+    "DavidBlackCN"
+  ],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.davidblackcn.buildupmenubutton.fabric.BuildupMenuButtonFabricClient"
+    ]
+  },
+  "mixins": [
+    "buildup_menu_button.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~26.2",
+    "java": ">=25",
+    "fabric-api": ">=0.156.0"
+  }
+}

@@ -1,0 +1,27 @@
+architectury {
+    common rootProject.enabled_platforms.split(',')
+}
+
+dependencies {
+    // We depend on Fabric Loader here to use the Fabric @Environment annotations,
+    // which get remapped to the correct annotations on each platform.
+    // Do NOT use other classes from Fabric Loader.
+    implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+}
+
+// Pure-Java layout tests: no JUnit or other external test dependencies.
+// Run via `gradlew :common:layoutTest` and wired into `check`.
+tasks.register('layoutTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs the pure-Java layout tests without launching Minecraft.'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.davidblackcn.buildupmenubutton.client.layout.LayoutTestSuite'
+}
+
+// Layout tests are JUnit-free and run via `layoutTest`; the default `test` task
+// must not fail because it discovers no JUnit classes.
+test {
+    failOnNoDiscoveredTests = false
+}
+
+check.dependsOn 'layoutTest'

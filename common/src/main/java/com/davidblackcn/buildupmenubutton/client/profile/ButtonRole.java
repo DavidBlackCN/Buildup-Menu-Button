@@ -1,0 +1,16 @@
+package com.davidblackcn.buildupmenubutton.client.profile;
+
+public enum ButtonRole {
+    CORE_FULL,
+    CORE_HALF,
+    TITLE_FRIENDS,
+    TITLE_LANGUAGE,
+    TITLE_ACCESSIBILITY,
+    TITLE_MOD_MENU_ICON,
+    TITLE_MOD_MENU_SHRINK_REALMS,
+    TITLE_MOD_MENU_SHRINK_BUTTON,
+    PAUSE_NATIVE_AUXILIARY,
+    AUXILIARY_COMPACT,
+    EXTENSION,
+    IGNORED
+}
